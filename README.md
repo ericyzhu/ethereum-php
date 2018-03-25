@@ -13,6 +13,9 @@ ext-script: [https://github.com/DomBlack/php-scrypt](https://github.com/DomBlack
 ext-secp256k1: [https://github.com/Bit-Wasp/secp256k1-php](https://github.com/Bit-Wasp/secp256k1-php)
 ## 使用
 ```
+composer require ericychu/ethereum-php
+```
+```
 // 实例化以太坊客户端
 $client = new Ethereum\Client(
     // JSON RPC 地址
