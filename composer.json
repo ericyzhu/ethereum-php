@@ -1,0 +1,28 @@
+{
+  "name": "ericychu/ethereum-php",
+  "description": "Ethereum client for PHP.",
+  "keywords": ["ethereum", "web3"],
+  "homepage": "https://github.com/ericychu/ethereum-php",
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Eric Chu",
+      "email": "ericychu@me.com",
+      "homepage": "https://github.com/ericychu"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Ethereum\\": "src"
+    }
+  },
+  "require": {
+    "php-64bit": "^7.2",
+    "ext-gmp": "^7.2",
+    "ext-scrypt": "^1.4",
+    "ext-secp256k1": "^0.1.0",
+    "graze/guzzle-jsonrpc": "^3.2",
+    "bitwasp/buffertools": "^0.5.0"
+  }
+}
