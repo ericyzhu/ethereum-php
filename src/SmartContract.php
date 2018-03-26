@@ -97,7 +97,7 @@ class SmartContract
      */
     public function watch(string $eventName, callable $eventHandler)
     {
-        $this->eventListeners[$eventName] = $eventHandler;
+        $this->eventListeners[$eventName][] = $eventHandler;
         return $this;
     }
 
@@ -110,7 +110,9 @@ class SmartContract
         $event = $this->getEvent($topic->toString());
         if (isset($this->eventListeners[$event->name])) {
             $data = $event->deserialize($log);
-            $this->eventListeners[$event->name](new Event($event, $log, $data));
+            foreach ($this->eventListeners[$event->name] as $listener) {
+                $listener(new Event($event, $log, $data));
+            }
         }
     }
 
