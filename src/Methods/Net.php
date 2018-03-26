@@ -14,7 +14,7 @@ class Net extends AbstractMethods
      */
     public function version(): Uint
     {
-        $response = $this->_send($this->_request(67, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::init($response);
     }
 
@@ -26,7 +26,7 @@ class Net extends AbstractMethods
      */
     public function listening(): bool
     {
-        $response = $this->_send($this->_request(67, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return (bool)$response;
     }
 
@@ -40,7 +40,7 @@ class Net extends AbstractMethods
      */
     public function peerCount(): Uint
     {
-        $response = $this->_send($this->_request(67, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 }
