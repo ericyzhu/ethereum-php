@@ -27,7 +27,7 @@ class Web3 extends AbstractMethods
      */
     public function sha3(string $stringToConvert): string
     {
-        $response = $this->_send($this->_request(64, __FUNCTION__, [$stringToConvert]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$stringToConvert]));
         return $response;
     }
 }

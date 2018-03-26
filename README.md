@@ -1,20 +1,49 @@
 # Ethereum Client for PHP
+
+PHP 版本以太坊 JSON RPC 客户端。
+
+可通过简单的添加合约地址和 ABI 来方便的调用合约内的方法，对于需要对交易签名的请求，客户端会自动完成。
+`pure` 和 `view` 的方法，可以直接以数组的形式返回反序列化后的数据；`nonpayable` 和 `payable` 的方法返回交易的哈希（`\Ethereum\Types\Hash` 实例）。
+
+支持对事件（Log）的监听，但需要通过定时器执行 `\Ethereum\Client::synchronizer->sync()` 方法来轮询，
+当有事件到达会执行自定义的回调并传递一个 `\Ethereum\Types\Event` 的实例，该实例包含了反序列化后的事件输入和相关的区块、交易数据。
+
+## JSON RPC API 实现度
+
+已实现
+
+* eth_*
+* net_*
+* web3_*
+
+未实现
+
+* shh_*
+
 ## 依赖
+
 ```
 php-64bit: ^7.2
 ext-gmp: ^7.2
-ext-scrypt: ^1.4  
+ext-scrypt: ^1.4
 ext-secp256k1: ^0.1.0
 graze/guzzle-jsonrpc: ^3.2
 bitwasp/buffertools: ^0.5.0
 ```
-ext-script: [https://github.com/DomBlack/php-scrypt](https://github.com/DomBlack/php-scrypt)
 
-ext-secp256k1: [https://github.com/Bit-Wasp/secp256k1-php](https://github.com/Bit-Wasp/secp256k1-php)
+* ext-scrypt: [https://github.com/DomBlack/php-scrypt](https://github.com/DomBlack/php-scrypt)
+* ext-secp256k1: [https://github.com/Bit-Wasp/secp256k1-php](https://github.com/Bit-Wasp/secp256k1-php)
+
 ## 使用
+
+### 安装
+
 ```
 composer require ericychu/ethereum-php
 ```
+
+### 示例
+
 ```
 // 实例化以太坊客户端
 $client = new Ethereum\Client(
@@ -55,7 +84,7 @@ swoole_timer_tick(1000, function() use ($client) {
 });
 
 // 调用 JSON API
-// $client->eth();
-// $client->web3();
-// $client->net();
+echo $client->eth()->protocolVersion();
+echo $client->web3()->clientVersion();
+echo $client->net()->version();
 ```

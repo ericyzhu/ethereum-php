@@ -24,10 +24,10 @@ abstract class AbstractMethods
         return $result;
     }
 
-    protected function _request(int $id, string $method, ?array $params = null)
+    protected function _request(string $method, ?array $params = null)
     {
         $class = explode('\\', get_class($this));
-        $request = $this->client->request($id, strtolower(array_pop($class)).'_'.$method, $params);
+        $request = $this->client->request(1, strtolower(array_pop($class)).'_'.$method, $params);
         return $request;
     }
 }

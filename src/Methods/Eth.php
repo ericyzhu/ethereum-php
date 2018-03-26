@@ -7,6 +7,7 @@ use Ethereum\Types\Block;
 use Ethereum\Types\BlockNumber;
 use Ethereum\Types\Byte;
 use Ethereum\Types\Filter;
+use Ethereum\Types\HashCollection;
 use Ethereum\Types\LogCollection;
 use Ethereum\Types\Sync;
 use Ethereum\Types\Transaction;
@@ -28,7 +29,7 @@ class Eth extends AbstractMethods
      */
     public function protocolVersion(): Uint
     {
-        $response = $this->_send($this->_request(67, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 
@@ -46,7 +47,7 @@ class Eth extends AbstractMethods
      */
     public function syncing()
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         if (is_bool($response)) {
             return (bool)$response;
         }
@@ -63,7 +64,7 @@ class Eth extends AbstractMethods
      */
     public function coinbase(): ?Address
     {
-        $response = $this->_send($this->_request(64, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return empty($response) ? null : Address::init($response);
     }
 
@@ -75,7 +76,7 @@ class Eth extends AbstractMethods
      */
     public function mining(): bool
     {
-        $response = $this->_send($this->_request(71, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return (bool)$response;
     }
 
@@ -89,7 +90,7 @@ class Eth extends AbstractMethods
      */
     public function hashrate(): Uint
     {
-        $response = $this->_send($this->_request(71, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 
@@ -103,7 +104,7 @@ class Eth extends AbstractMethods
      */
     public function gasPrice(): Uint
     {
-        $response = $this->_send($this->_request(73, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 
@@ -117,7 +118,7 @@ class Eth extends AbstractMethods
      */
     public function accounts(): array
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         $addresses = [];
         foreach ($response as $address) {
             $addresses[] = Address::init($address);
@@ -135,7 +136,7 @@ class Eth extends AbstractMethods
      */
     public function blockNumber(): Uint
     {
-        $response = $this->_send($this->_request(83, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 
@@ -155,7 +156,7 @@ class Eth extends AbstractMethods
      */
     public function getBalance(Address $address, BlockNumber $blockNumber): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$address->toString(), $blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$address->toString(), $blockNumber->toString()]));
         return Uint::initWithHex($response);
     }
 
@@ -169,7 +170,7 @@ class Eth extends AbstractMethods
      * Integer of the position in the storage.
      *
      * @param BlockNumber $blockNumber
-     * Integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
+     * Integer block number, or the string "latest", "earliest" or "pending", @see https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
      *
      * @return Uint
      * The value at this storage position.
@@ -180,7 +181,7 @@ class Eth extends AbstractMethods
      */
     public function getStorageAt(Address $address, Uint $quantity, BlockNumber $blockNumber): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$address->toString(), Utils::ensureHexPrefix($quantity->getHex()), $blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$address->toString(), Utils::ensureHexPrefix($quantity->getHex()), $blockNumber->toString()]));
         return Uint::initWithHex($response);
     }
 
@@ -200,7 +201,7 @@ class Eth extends AbstractMethods
      */
     public function getTransactionCount(Address $address, BlockNumber $blockNumber): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$address->toString(), $blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$address->toString(), $blockNumber->toString()]));
         return Uint::initWithHex($response);
     }
 
@@ -217,7 +218,7 @@ class Eth extends AbstractMethods
      */
     public function getBlockTransactionCountByHash(Hash $hash): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString()]));
         return Uint::initWithHex($response);
 
     }
@@ -235,7 +236,7 @@ class Eth extends AbstractMethods
      */
     public function getBlockTransactionCountByNumber(BlockNumber $blockNumber): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString()]));
         return Uint::initWithHex($response);
 
     }
@@ -253,7 +254,7 @@ class Eth extends AbstractMethods
      */
     public function getUncleCountByBlockHash(Hash $hash): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString()]));
         return Uint::initWithHex($response);
 
     }
@@ -271,7 +272,7 @@ class Eth extends AbstractMethods
      */
     public function getUncleCountByBlockNumber(BlockNumber $blockNumber): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString()]));
         return Uint::initWithHex($response);
 
     }
@@ -283,7 +284,7 @@ class Eth extends AbstractMethods
      * 20 Bytes - address
      *
      * @param BlockNumber $blockNumber
-     * Integer block number, or the string "latest", "earliest" or "pending", see the default block parameter
+     * Integer block number, or the string "latest", "earliest" or "pending", @see https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
      *
      * @return Byte
      * The code from the given address.
@@ -292,7 +293,7 @@ class Eth extends AbstractMethods
      */
     public function getCode(Address $address, BlockNumber $blockNumber)
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$address->toString(), $blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$address->toString(), $blockNumber->toString()]));
         return Byte::initWithHex($response);
     }
 
@@ -318,7 +319,7 @@ class Eth extends AbstractMethods
      */
     public function sign(Address $address, Byte $msgToSign): Byte
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$address->toString(), Utils::ensureHexPrefix($msgToSign->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$address->toString(), Utils::ensureHexPrefix($msgToSign->getHex())]));
         return Byte::initWithHex($response);
     }
 
@@ -351,7 +352,7 @@ class Eth extends AbstractMethods
      */
     public function sendTransaction(Transaction $transaction): Hash
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$transaction->toArray()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$transaction->toArray()]));
         return Hash::init($response);
 
     }
@@ -370,7 +371,7 @@ class Eth extends AbstractMethods
      */
     public function sendRawTransaction(Byte $data): Hash
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [Utils::ensureHexPrefix($data->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($data->getHex())]));
         return Hash::init($response);
 
     }
@@ -407,7 +408,7 @@ class Eth extends AbstractMethods
      */
     public function call(Transaction $transaction, BlockNumber $blockNumber): string
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$transaction->toArray(), $blockNumber->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$transaction->toArray(), $blockNumber->toString()]));
         return $response;
     }
 
@@ -418,7 +419,7 @@ class Eth extends AbstractMethods
      * for a variety of reasons including EVM mechanics and node performance.
      *
      * @param Transaction $transaction
-     * See eth_call parameters, expect that all properties are optional.
+     * @see Eth::call() parameters, expect that all properties are optional.
      * If no gas limit is specified geth uses the block gas limit from the pending block as an upper bound.
      * As a result the returned estimate might not be enough to executed the call/transaction when the amount of gas is higher than the pending block gas limit.
      *
@@ -429,7 +430,7 @@ class Eth extends AbstractMethods
      */
     public function estimateGas(Transaction $transaction): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$transaction->toArray()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$transaction->toArray()]));
         return Uint::initWithHex($response);
     }
 
@@ -447,7 +448,7 @@ class Eth extends AbstractMethods
      */
     public function getBlockByHash(Hash $hash, bool $expandTransactions = false): ?Block
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString(), $expandTransactions]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString(), $expandTransactions]));
         return ! empty($response) ? new Block($response) : null;
 
     }
@@ -462,11 +463,11 @@ class Eth extends AbstractMethods
      * If true it returns the full transaction objects, if false only the hashes of the transactions.
      *
      * @return Block|null
-     * See eth_getBlockByHash
+     * @see Eth::getBlockByHash()
      */
     public function getBlockByNumber(BlockNumber $blockNumber, bool $expandTransactions = false): ?Block
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$blockNumber->toString(), $expandTransactions]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString(), $expandTransactions]));
         return ! empty($response) ? new Block($response) : null;
     }
 
@@ -481,7 +482,7 @@ class Eth extends AbstractMethods
      */
     public function getTransactionByHash(Hash $hash): ?TransactionInfo
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString()]));
         return ! empty($response) ? new TransactionInfo($response) : null;
     }
 
@@ -495,11 +496,11 @@ class Eth extends AbstractMethods
      * Integer of the transaction index position.
      *
      * @return TransactionInfo|null
-     * See eth_getTransactionByHash
+     * @see Eth::getTransactionByHash()
      */
     public function getTransactionByBlockHashAndIndex(Hash $hash, Uint $index): ?TransactionInfo
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString(), Utils::ensureHexPrefix($index->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString(), Utils::ensureHexPrefix($index->getHex())]));
         return ! empty($response) ? new TransactionInfo($response) : null;
     }
 
@@ -513,11 +514,11 @@ class Eth extends AbstractMethods
      * The transaction index position.
      *
      * @return TransactionInfo|null
-     * See eth_getTransactionByHash
+     * @see Eth::getTransactionByHash()
      */
     public function getTransactionByBlockNumberAndIndex(BlockNumber $blockNumber, Uint $index): ?TransactionInfo
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$blockNumber->toString(), Utils::ensureHexPrefix($index->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString(), Utils::ensureHexPrefix($index->getHex())]));
         return ! empty($response) ? new TransactionInfo($response) : null;
 
     }
@@ -533,7 +534,7 @@ class Eth extends AbstractMethods
      */
     public function getTransactionReceipt(Hash $hash): ?TransactionReceipt
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString()]));
         return ! empty($response) ? new TransactionReceipt($response) : null;
 
     }
@@ -548,11 +549,11 @@ class Eth extends AbstractMethods
      * The uncle's index position.
      *
      * @return Block|null
-     * See eth_getBlockByHash
+     * @see Eth::getBlockByHash()
      */
     public function getUncleByBlockHashAndIndex(Hash $hash, Uint $index): ?Block
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$hash->toString(), Utils::ensureHexPrefix($index->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$hash->toString(), Utils::ensureHexPrefix($index->getHex())]));
         return ! empty($response) ? new Block($response) : null;
     }
 
@@ -566,11 +567,11 @@ class Eth extends AbstractMethods
      * The uncle's index position.
      *
      * @return Block|null
-     * See eth_getBlockByHash
+     * @see Eth::getBlockByHash()
      */
     public function getUncleByBlockNumberAndIndex(BlockNumber $blockNumber, Uint $index): ?Block
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$blockNumber->toString(), Utils::ensureHexPrefix($index->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString(), Utils::ensureHexPrefix($index->getHex())]));
         return ! empty($response) ? new Block($response) : null;
 
     }
@@ -583,7 +584,7 @@ class Eth extends AbstractMethods
      */
     public function getCompilers(): array
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, []));
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return ! empty($response) ? $response : [];
 
     }
@@ -599,7 +600,7 @@ class Eth extends AbstractMethods
      */
     public function compileSolidity(string $code): array
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$code]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$code]));
         return ! empty($response) ? $response : [];
     }
 
@@ -632,7 +633,35 @@ class Eth extends AbstractMethods
      */
     public function newFilter(Filter $filter): Uint
     {
-        $response = $this->_send($this->_request(1, __FUNCTION__, [$filter->toArray()]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$filter->toArray()]));
+        return Uint::initWithHex($response);
+    }
+
+    /**
+     * Creates a filter in the node, to notify when a new block arrives. To check if the state has changed, call eth_getFilterChanges.
+     *
+     * @return Uint
+     * A filter id.
+     *
+     * @throws \Exception
+     */
+    public function newBlockFilter(): Uint
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, []));
+        return Uint::initWithHex($response);
+    }
+
+    /**
+     * Creates a filter in the node, to notify when new pending transactions arrive. To check if the state has changed, call eth_getFilterChanges.
+     *
+     * @return Uint
+     * A filter id.
+     *
+     * @throws \Exception
+     */
+    public function newPendingTransactionFilter(): Uint
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, []));
         return Uint::initWithHex($response);
     }
 
@@ -648,7 +677,7 @@ class Eth extends AbstractMethods
      */
     public function uninstallFilter(Uint $filterId): bool
     {
-        $response = $this->_send($this->_request(73, __FUNCTION__, [Utils::ensureHexPrefix($filterId->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($filterId->getHex())]));
         return (bool)$response;
     }
 
@@ -686,9 +715,91 @@ class Eth extends AbstractMethods
      */
     public function getFilterChanges(Uint $filterId): LogCollection
     {
-        $response = $this->_send($this->_request(73, __FUNCTION__, [Utils::ensureHexPrefix($filterId->getHex())]));
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($filterId->getHex())]));
         return new LogCollection($response);
     }
 
-    // @todo: missing methods
+    /**
+     * Returns an array of all logs matching filter with given id.
+     *
+     * @param Uint $filterId
+     * The filter id.
+     *
+     * @return LogCollection
+     * @see Eth::getFilterChanges()
+     */
+    public function getFilterLogs(Uint $filterId): LogCollection
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($filterId->getHex())]));
+        return new LogCollection($response);
+    }
+
+    /**
+     * Returns an array of all logs matching a given filter object.
+     *
+     * @param Filter $filter
+     * The filter object, @see Eth::newFilter()
+     *
+     * @return LogCollection
+     * @see Eth::getFilterChanges()
+     */
+    public function getLogs(Filter $filter): LogCollection
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, [$filter->toArray()]));
+        return new LogCollection($response);
+    }
+
+    /**
+     * Returns the hash of the current block, the seedHash, and the boundary condition to be met ("target").
+     *
+     * @return HashCollection
+     * Array with the following properties:
+     * DATA, 32 Bytes - current block header pow-hash
+     * DATA, 32 Bytes - the seed hash used for the DAG.
+     * DATA, 32 Bytes - the boundary condition ("target"), 2^256 / difficulty.
+     */
+    public function getWork(): HashCollection
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, []));
+        return new HashCollection($response);
+    }
+
+    /**
+     * Used for submitting a proof-of-work solution.
+     *
+     * @param Uint $nonceFound
+     * DATA, 8 Bytes - The nonce found (64 bits)
+     *
+     * @param Hash $powHash
+     * DATA, 32 Bytes - The header's pow-hash (256 bits)
+     *
+     * @param Hash $mixDigest
+     * DATA, 32 Bytes - The mix digest (256 bits)
+     *
+     * @return bool
+     * Boolean - returns true if the provided solution is valid, otherwise false.
+     */
+    public function submitWork(Uint $nonceFound, Hash $powHash, Hash $mixDigest): bool
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($nonceFound->getHex(), 8), $powHash->toString(), $mixDigest->toString()]));
+        return (bool)$response;
+    }
+
+    /**
+     * Used for submitting mining hashrate.
+     *
+     * @param Uint $ashrate
+     * Hashrate, a hexadecimal string representation (32 bytes) of the hash rate
+     *
+     * @param Hash $id
+     * ID, String - A random hexadecimal(32 bytes) ID identifying the client
+     *
+     * @return bool
+     * Boolean - returns true if submitting went through succesfully and false otherwise.
+     */
+    public function submitHashrate(Uint $ashrate, Hash $id): bool
+    {
+        $response = $this->_send($this->_request(__FUNCTION__, [Utils::ensureHexPrefix($ashrate->getHex(), 32), $id->toString()]));
+        return (bool)$response;
+    }
 }

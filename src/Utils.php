@@ -26,14 +26,23 @@ abstract class Utils
     }
 
     /**
-     * @param string $string
+     * @param $string
+     * @param int $padBytes
+     * @param int $padMode
+     * STR_PAD_LEFT or STR_PAD_RIGHT
      * @return string
      */
-    public static function ensureHexPrefix($string)
+    public static function ensureHexPrefix($string, int $padBytes = 0, int $padMode = STR_PAD_LEFT)
     {
-        if (static::hasHexPrefix($string)) {
+        if ($padBytes > 0) {
+            $string = static::removeHexPrefix($string);
+            if ($padMode === STR_PAD_LEFT or $padMode === STR_PAD_RIGHT) {
+                $string = str_pad($string, $padBytes * 2, '0', $padMode);
+            }
+        } elseif (static::hasHexPrefix($string)) {
             return $string;
         }
+
         return '0x' . $string;
     }
 

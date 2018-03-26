@@ -41,6 +41,6 @@ swoole_timer_tick(1000, function() use ($client) {
 });
 
 // 调用 JSON API
-// $client->eth();
-// $client->web3();
-// $client->net();
+echo $client->eth()->protocolVersion();
+echo $client->web3()->clientVersion();
+echo $client->net()->version();
