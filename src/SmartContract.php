@@ -93,12 +93,13 @@ class SmartContract
     /**
      * @param string $eventName
      * @param callable $eventHandler
-     * @return $this
+     * @return string
      */
     public function watch(string $eventName, callable $eventHandler)
     {
-        $this->eventListeners[$eventName] = $eventHandler;
-        return $this;
+        $id = spl_object_hash((object)$eventHandler);
+        $this->eventListeners[$eventName][$id] = $eventHandler;
+        return $id;
     }
 
     public function dispatch(Log $log): void
@@ -110,17 +111,20 @@ class SmartContract
         $event = $this->getEvent($topic->toString());
         if (isset($this->eventListeners[$event->name])) {
             $data = $event->deserialize($log);
-            $this->eventListeners[$event->name](new Event($event, $log, $data));
+            foreach ($this->eventListeners[$event->name] as $listener) {
+                $listener(new Event($event, $log, $data));
+            }
         }
     }
 
     /**
      * @param string $eventName
+     * @param string $id
      * @return $this
      */
-    public function unwatch(string $eventName)
+    public function unwatch(string $eventName, string $id)
     {
-        unset($this->eventListeners[$eventName]);
+        unset($this->eventListeners[$eventName][$id]);
         return $this;
     }
 

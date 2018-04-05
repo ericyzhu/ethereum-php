@@ -60,7 +60,7 @@ class StructEvent
             }
         }
 
-        $this->signature = Utils::ensureHexPrefix(substr(Keccak::hash(sprintf('%s(%s)', $this->name, $this->inputs->getStringTypes()), 256), 0, 64));
+        $this->signature = Utils::ensureHexPrefix(substr(Keccak::hash(sprintf('%s(%s)', $this->name, $this->inputs->getStringTypes())), 0, 64));
     }
 
     /**

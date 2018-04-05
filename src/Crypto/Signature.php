@@ -2,6 +2,7 @@
 
 namespace Ethereum\Crypto;
 
+use Ethereum\Types\Address;
 use Ethereum\Types\Byte;
 use Exception;
 
@@ -36,9 +37,36 @@ class Signature
     }
 
     /**
-     * @todo
+     * @param Byte $hash
+     * @param Byte $signature
+     * @return Byte
+     * @throws Exception
      */
-    public static function ecrecover()
+    public static function recoverPublicKey(Byte $hash, Byte $signature): Byte
     {
+        /** @var resource $context */
+        $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+        /** @var resource $secpSignature */
+        $secpSignature = '';
+        $recoveryId = $signature->slice(64)->getInt();
+        secp256k1_ecdsa_recoverable_signature_parse_compact($context, $secpSignature, $signature->slice(0, 64)->getBinary(), $recoveryId);
+        /** @var resource $secpPublicKey */
+        $secpPublicKey = '';
+        secp256k1_ecdsa_recover($context, $secpPublicKey, $secpSignature, $hash->getBinary());
+        $publicKey = '';
+        secp256k1_ec_pubkey_serialize($context, $publicKey, $secpPublicKey, 0);
+        unset($context, $secpSignature, $secpPublicKey);
+        return Byte::init($publicKey);
+    }
+
+    /**
+     * @param Byte $publicKey
+     * @return Address
+     * @throws Exception
+     */
+    public static function publicKeyToAddress(Byte $publicKey): Address
+    {
+        $ret = Byte::initWithHex(Keccak::hash($publicKey->slice(1)->getBinary()));
+        return Address::initWithBuffer($ret->slice(12)->getBuffer());
     }
 }

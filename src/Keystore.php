@@ -119,7 +119,7 @@ class Keystore
      */
     private function validateDerivedKey(string $key, string $ciphertext, string $mac)
     {
-        return Keccak::hash(pack('H*', substr($key, 32, 32).$ciphertext),  256) === $mac;
+        return Keccak::hash(pack('H*', substr($key, 32, 32).$ciphertext)) === $mac;
     }
 
     /**
