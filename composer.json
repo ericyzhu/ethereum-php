@@ -18,11 +18,11 @@
     }
   },
   "require": {
-    "php-64bit": "^7.2",
-    "ext-gmp": "^7.2",
-    "ext-scrypt": "^1.4",
+    "php-64bit": "~7.2",
+    "ext-gmp": "*",
+    "ext-scrypt": "~1.4",
     "ext-secp256k1": "^0.1.0",
-    "ext-keccak": "^0.2",
+    "ext-keccak": "~0.2",
     "graze/guzzle-jsonrpc": "^3.2",
     "bitwasp/buffertools": "^0.5.0"
   }
