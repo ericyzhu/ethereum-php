@@ -4,6 +4,7 @@ namespace Ethereum\Crypto;
 
 use Ethereum\Types\Address;
 use Ethereum\Types\Byte;
+use Ethereum\Types\Uint;
 use Exception;
 
 class Signature
@@ -11,11 +12,10 @@ class Signature
     /**
      * @param Byte $hash
      * @param Byte $privateKey
-     * @param int $recoveryId
      * @return Byte
      * @throws Exception
      */
-    public static function sign(Byte $hash, Byte $privateKey, &$recoveryId): Byte
+    public static function sign(Byte $hash, Byte $privateKey): Byte
     {
         /** @var resource $context */
         $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
@@ -29,11 +29,12 @@ class Signature
         }
         /** @var string $serialized */
         $serialized = '';
+        $recoveryId = 0;
         secp256k1_ecdsa_recoverable_signature_serialize_compact($context, $signature, $serialized, $recoveryId);
 
         unset($context, $signature);
 
-        return Byte::init($serialized);
+        return Byte::init($serialized.Uint::init($recoveryId)->getBinary());
     }
 
     /**
