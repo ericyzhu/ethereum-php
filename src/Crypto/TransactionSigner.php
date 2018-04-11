@@ -41,12 +41,11 @@ final class TransactionSigner
         /** @var Byte $hash */
         $hash = $this->hash($transaction);
 
-        /** @var int $recoveryId */
-        $recoveryId = 0;
-        $signature = Signature::sign($hash, $privateKey, $recoveryId);
+        $signature = Signature::sign($hash, $privateKey);
 
-        $r = Uint::initWithHex(Utils::trimHex(substr($signature->getHex(), 0, 64)));
-        $s = Uint::initWithHex(Utils::trimHex(substr($signature->getHex(), 64)));
+        $r = Uint::initWithBuffer($signature->slice(0, 32)->getBuffer());
+        $s = Uint::initWithBuffer($signature->slice(32, 32)->getBuffer());
+        $recoveryId = $signature->slice(64)->getInt();
         if ($this->chainId->getInt() > 0) {
             $v = Uint::init($recoveryId + 35 + $this->chainIdMul->getInt());
         } else {
