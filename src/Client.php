@@ -15,6 +15,8 @@ use Exception;
  * @property Uint $chainId
  * @property Synchronizer $synchronizer
  * @property StorageInterface $storage
+ * @property Uint $gasPrice
+ * @property Uint $gasLimit
  */
 class Client
 {
@@ -52,6 +54,16 @@ class Client
      * @var StorageInterface
      */
     private $storage;
+
+    /**
+     * @var Uint
+     */
+    private $gasPrice;
+
+    /**
+     * @var Uint
+     */
+    private $gasLimit;
 
     /**
      * @param string $url
@@ -108,6 +120,26 @@ class Client
     }
 
     /**
+     * @param int $value
+     * @return $this
+     */
+    public function setGasPrice(int $value)
+    {
+        $this->gasPrice = Uint::init($value);
+        return $this;
+    }
+
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function setGasLimit(int $value)
+    {
+        $this->gasLimit = Uint::init($value);
+        return $this;
+    }
+
+    /**
      * @param string $name
      * @return mixed
      * @throws Exception
@@ -119,6 +151,8 @@ class Client
             case 'chainId':
             case 'synchronizer':
             case 'storage':
+            case 'gasPrice':
+            case 'gasLimit':
                 return $this->{$name};
         }
         throw new Exception('Call to undefined property: ' . $name);
