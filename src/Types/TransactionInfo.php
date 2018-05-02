@@ -70,7 +70,7 @@ class TransactionInfo
     public function __construct(array $data)
     {
         $this->blockHash        = Hash::init($data['blockHash']);
-        $this->blockNumber      = BlockNumber::initWithHex(($data['blockNumber']));
+        $this->blockNumber      = BlockNumber::initWithHex($data['blockNumber']);
         $this->from             = Address::init($data['from']);
         $this->to               = empty($data['to']) ? null : Address::init($data['to']);
         $this->gas              = Uint::initWithHex($data['gas']);

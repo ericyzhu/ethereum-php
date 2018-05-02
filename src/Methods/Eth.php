@@ -129,15 +129,15 @@ class Eth extends AbstractMethods
     /**
      * Returns the number of most recent block.
      *
-     * @return Uint
+     * @return BlockNumber
      * Iinteger of the current block number the client is on.
      *
      * @throws \Exception
      */
-    public function blockNumber(): Uint
+    public function blockNumber(): BlockNumber
     {
         $response = $this->_send($this->_request(__FUNCTION__, []));
-        return Uint::initWithHex($response);
+        return BlockNumber::initWithHex($response);
     }
 
     /**
@@ -467,7 +467,7 @@ class Eth extends AbstractMethods
      */
     public function getBlockByNumber(BlockNumber $blockNumber, bool $expandTransactions = false): ?Block
     {
-        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->toString(), $expandTransactions]));
+        $response = $this->_send($this->_request(__FUNCTION__, [$blockNumber->isTag() ? $blockNumber->toString() : Utils::ensureHexPrefix($blockNumber->getHex()), $expandTransactions]));
         return ! empty($response) ? new Block($response) : null;
     }
 

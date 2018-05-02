@@ -16,6 +16,10 @@ class BlockNumber extends TypeAbstract
      */
     private $isTag;
 
+    /**
+     * @param BufferInterface $buffer
+     * @param bool $isTag
+     */
     protected function __construct(BufferInterface $buffer, bool $isTag)
     {
         parent::__construct($buffer);
@@ -48,9 +52,17 @@ class BlockNumber extends TypeAbstract
      * @return BlockNumber
      * @throws \Exception
      */
-    public static function initWithHex(string $hex): BlockNumber
+    public static function initWithHex(?string $hex): BlockNumber
     {
-        return new static(Buffer::hex(Utils::removeHexPrefix($hex)), false);
+        return new static(Buffer::hex(Utils::removeHexPrefix((string)$hex)), false);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTag(): bool
+    {
+        return $this->isTag;
     }
 
     /**
