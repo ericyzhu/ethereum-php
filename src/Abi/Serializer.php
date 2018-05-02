@@ -42,8 +42,9 @@ class Serializer
             if ($parameter->isDynamic()) {
                 // offset
                 $head      .= $uint->serialize($headBytes);
-                $dynamic   .= $parameter->serialize($argument);
-                $dynamicLength = strlen($dynamic);
+                $serialized = $parameter->serialize($argument);
+                $dynamic   .= $serialized;
+                $dynamicLength = strlen($serialized);
                 $headBytes += $dynamicLength > 0 ? $dynamicLength / 2 : 0;
             } else {
                 $head .= $parameter->serialize($argument);
