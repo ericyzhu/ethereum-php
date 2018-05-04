@@ -178,7 +178,7 @@ class SmartContract
             throw new Exception('Can not call payable function.');
         }
         // query gas price
-        $gasPrice = $this->client->gasPrice ?? $this->client->eth()->gasPrice();
+        $gasPrice = empty($this->client->gasPrice) ? $this->client->eth()->gasPrice() : $this->client->gasPrice;
         // create transaction
         $transaction = new Transaction(
             $nodeAddress,
@@ -188,7 +188,7 @@ class SmartContract
             $gasPrice
         );
         // query gas
-        $transaction->gas   = $this->client->gasLimit ?? $this->client->eth()->estimateGas($transaction);
+        $transaction->gas   = empty($this->client->gasLimit) ? $this->client->eth()->estimateGas($transaction) : $this->client->gasLimit;
         // query nonce
         $transaction->nonce = $this->client->eth()->getTransactionCount($nodeAddress, BlockNumber::init(BlockNumber::PENDING));
         // sign transaction

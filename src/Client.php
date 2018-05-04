@@ -125,7 +125,7 @@ class Client
      */
     public function setGasPrice(int $value)
     {
-        $this->gasPrice = Uint::init($value);
+        $this->gasPrice = empty($value) ? null : Uint::init($value);
         return $this;
     }
 
@@ -135,7 +135,7 @@ class Client
      */
     public function setGasLimit(int $value)
     {
-        $this->gasLimit = Uint::init($value);
+        $this->gasLimit = empty($value) ? null : Uint::init($value);
         return $this;
     }
 
