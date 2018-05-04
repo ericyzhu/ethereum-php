@@ -66,7 +66,7 @@ class TypeBytes extends AbstractTypeBytes
             $length = (new TypeUint())->deserialize(substr($data, 0, 64));
             $data   = substr($data, 64, $length * 2);
         } else {
-            $data = substr($data, 64, $this->getByteSize() * 2);
+            $data = substr($data, 0, $this->getByteSize() * 2);
         }
         return $this->dehexize($data);
     }
