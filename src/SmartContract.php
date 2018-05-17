@@ -13,6 +13,7 @@ use Ethereum\Types\Transaction;
 use Ethereum\Types\BlockNumber;
 use Ethereum\Types\Hash;
 use BadMethodCallException;
+use Ethereum\Types\Uint;
 use Exception;
 
 class SmartContract
@@ -130,11 +131,12 @@ class SmartContract
 
     /**
      * @param string $functionName
-     * @param array ...$arguments
+     * @param array $arguments
+     * @param Uint|null $gasPrice
      * @return mixed
      * @throws Exception
      */
-    public function call(string $functionName, ...$arguments)
+    public function call(string $functionName, array $arguments, ?Uint $gasPrice = null)
     {
         $function = $this->getFunction($functionName);
         $data     = Byte::initWithHex($function->getSignature() . $function->inputs->serialize($arguments));
@@ -142,7 +144,7 @@ class SmartContract
         if ($function->constant) {
             return $this->callConstantFunction($function, $data);
         } else {
-            return $this->callNonConstantFunction($function, $data);
+            return $this->callNonConstantFunction($function, $data, $gasPrice);
         }
     }
 
@@ -167,10 +169,11 @@ class SmartContract
     /**
      * @param StructFunction $function
      * @param Byte $data
+     * @param Uint|null $gasPrice
      * @return Hash
      * @throws Exception
      */
-    protected function callNonConstantFunction(StructFunction $function, Byte $data)
+    protected function callNonConstantFunction(StructFunction $function, Byte $data, ?Uint $gasPrice = null)
     {
         $nodeAddress = $this->client->keystore()->getAddress();
         if ($function->payable) {
@@ -178,7 +181,7 @@ class SmartContract
             throw new Exception('Can not call payable function.');
         }
         // query gas price
-        $gasPrice = empty($this->client->gasPrice) ? $this->client->eth()->gasPrice() : $this->client->gasPrice;
+        $gasPrice = $gasPrice ?? ($this->client->gasPrice ?? $this->client->eth()->gasPrice());
         // create transaction
         $transaction = new Transaction(
             $nodeAddress,
@@ -188,7 +191,7 @@ class SmartContract
             $gasPrice
         );
         // query gas
-        $transaction->gas   = empty($this->client->gasLimit) ? $this->client->eth()->estimateGas($transaction) : $this->client->gasLimit;
+        $transaction->gas   = $this->client->gasLimit ?? $this->client->eth()->estimateGas($transaction);
         // query nonce
         $transaction->nonce = $this->client->eth()->getTransactionCount($nodeAddress, BlockNumber::init(BlockNumber::PENDING));
         // sign transaction
