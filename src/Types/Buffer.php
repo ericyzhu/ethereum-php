@@ -24,11 +24,12 @@ class Buffer extends \BitWasp\Buffertools\Buffer
      */
     public static function hex(string $hexString = '', int $byteSize = null): BufferInterface
     {
-        if (strlen($hexString) > 0 && !ctype_xdigit($hexString)) {
+        $len = strlen($hexString);
+        if ($len > 0 && !ctype_xdigit($hexString)) {
             throw new \InvalidArgumentException('Buffer::hex: non-hex character passed');
         }
 
-        $binary = pack("H*", $hexString);
+        $binary = pack("H*", $len % 2 === 0 ? $hexString : str_pad($hexString, $len + 1, '0', STR_PAD_LEFT));
         return new static($binary, $byteSize);
     }
 

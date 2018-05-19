@@ -173,7 +173,7 @@ class Keystore
     /**
      * @return Byte
      */
-    private function getPrivateKey(): Byte
+    public function getPrivateKey(): Byte
     {
         return $this->privateKey;
     }
