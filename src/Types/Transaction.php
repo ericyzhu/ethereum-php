@@ -113,19 +113,19 @@ class Transaction
         }
 
         if (! $this->gas->isEmpty()) {
-            $transaction['gas'] = Utils::ensureHexPrefix($this->gas->getHex());
+            $transaction['gas'] = Utils::ensureHexPrefix(ltrim($this->gas->getHex(), '0'));
         }
 
         if (! $this->gasPrice->isEmpty()) {
-            $transaction['gasPrice'] = Utils::ensureHexPrefix($this->gasPrice->getHex());
+            $transaction['gasPrice'] = Utils::ensureHexPrefix(ltrim($this->gasPrice->getHex(), '0'));
         }
 
         if (! $this->value->isEmpty()) {
-            $transaction['value'] = Utils::ensureHexPrefix($this->value->getHex());
+            $transaction['value'] = Utils::ensureHexPrefix(ltrim($this->value->getHex(), '0'));
         }
 
         if (! $this->nonce->isEmpty()) {
-            $transaction['nonce'] = Utils::ensureHexPrefix($this->nonce->getHex());
+            $transaction['nonce'] = Utils::ensureHexPrefix(ltrim($this->nonce->getHex(), '0'));
         }
 
         return $transaction;
