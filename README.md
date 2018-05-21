@@ -81,7 +81,7 @@ $client->contracts
 `pure` 和 `view` 的方法，可以直接以数组的形式返回反序列化后的数据；`nonpayable` 和 `payable` 的方法返回交易的哈希（`\Ethereum\Types\Hash` 实例）。
 
 ```
-$result = $client->contracts->test_contract->call('test_function', 'test_arg_1', 'test_arg_2');
+$result = $client->contracts->test_contract->call('test_function', ['test_arg_1', 'test_arg_2']);
 ```
 
 #### 监听事件
