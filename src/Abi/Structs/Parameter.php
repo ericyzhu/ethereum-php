@@ -112,7 +112,7 @@ abstract class Parameter implements ParameterInterface
         }
 
         $this->typeResolver    = new $class($matches['elementaryTypeSize']);
-        $this->containerType   = ! empty($matches['arrayString']);
+        $this->containerType   = empty($matches['arrayString']) ? static::CONTAINER_NONE : static::CONTAINER_ARRAY;
         $this->containerLength = $this->containerType === static::CONTAINER_ARRAY ? (int)$matches['arrayLength'] : 0;
         $this->isDynamic       = $this->typeResolver->isDynamic() or ($this->containerType === static::CONTAINER_ARRAY and $this->containerLength === 0);
     }
@@ -136,6 +136,7 @@ abstract class Parameter implements ParameterInterface
             foreach ($data as $item) {
                 $output .= $this->typeResolver->serialize($item);
             }
+        } elseif ($this->containerType === static::CONTAINER_TUPLE) {
         } else {
             $output .= $this->typeResolver->serialize($data);
         }

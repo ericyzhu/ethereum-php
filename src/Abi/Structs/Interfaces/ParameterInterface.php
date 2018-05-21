@@ -9,8 +9,9 @@ namespace Ethereum\Abi\Structs\Interfaces;
  */
 interface ParameterInterface
 {
-    public const CONTAINER_ARRAY = 0;
-    public const CONTAINER_TUPLE = 1;
+    public const CONTAINER_NONE  = 0;
+    public const CONTAINER_ARRAY = 1;
+    public const CONTAINER_TUPLE = 2;
 
     /**
      * @param object $data
