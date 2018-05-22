@@ -96,7 +96,7 @@ abstract class Parameter implements ParameterInterface
          * Fixed point numbers are not fully supported by Solidity yet.
          * They can be declared, but cannot be assigned to or from.
          */
-        $pattern = "#^(?P<elementaryType>[a-z]+)(?P<elementaryTypeSize>(\d+x\d+|\d*))(?P<arrayString>(\[(?P<arrayLength>\d*)\]){0,1})*$#";
+        $pattern = "#^(?P<elementaryType>[a-z]+)(?P<elementaryTypeSize>(\d+x\d+|\d*))(?P<arrayString>\[(?P<arrayLength>\d*)\]){0,1}$#";
         $valid = (bool)preg_match($pattern, $this->type, $matches);
 
         if (! $valid) {
