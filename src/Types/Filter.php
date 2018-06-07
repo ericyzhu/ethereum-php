@@ -36,7 +36,7 @@ class Filter
         $this->fromBlock = $fromBlock;
         $this->toBlock   = $toBlock;
         $this->address   = $address;
-        $this->address   = $topics;
+        $this->topics    = $topics;
     }
 
     /**
@@ -47,11 +47,11 @@ class Filter
         $array = [];
 
         if (! $this->fromBlock->isEmpty()) {
-            $array['fromBlock'] = $this->fromBlock->toString();
+            $array['fromBlock'] = $this->fromBlock->toHexString();
         }
 
         if (! $this->toBlock->isEmpty()) {
-            $array['toBlock'] = $this->toBlock->toString();
+            $array['toBlock'] = $this->toBlock->toHexString();
         }
 
         if (! empty($this->address)) {
