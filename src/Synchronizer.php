@@ -77,11 +77,19 @@ class Synchronizer
 
     /**
      * @return Uint|null
+     * @throws \Exception
      */
     public function getFilterId(): ?Uint
     {
-        $filterId = $this->client->storage->get('synchronizer_filter_id');
-        return empty($filterId) ? null : Uint::init((string)$filterId);
+        if (empty($this->filterId)) {
+            $filterId = $this->client->storage->get('synchronizer_filter_id');
+            if (empty($filterId)) {
+                $this->filterId = $this->registerFilter();
+            } else {
+                $this->filterId = Uint::init((string)$filterId);
+            }
+        }
+        return $this->filterId;
     }
 
     /**
@@ -95,6 +103,7 @@ class Synchronizer
     }
 
     /**
+     * @return  Uint
      * @throws \Exception
      */
     protected function registerFilter()
@@ -102,22 +111,23 @@ class Synchronizer
         $filter = new Filter($this->getLatestSyncedBlockNumber(), BlockNumber::init(BlockNumber::LATEST), $this->contracts->getAddresses());
         $filterId = $this->client->eth()->newFilter($filter);
         $this->setFilterId($filterId);
+        return $filterId;
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function sync(): void
     {
         $filterId = $this->getFilterId();
-        if (empty($filterId)) {
-            $this->registerFilter();
-        }
         try {
             $logs = $this->client->eth()->getFilterChanges($filterId);
         } catch (Throwable $e) {
-            $this->registerFilter();
-            return;
+            if ($e->getMessage() == 'filter not found') {
+                $this->registerFilter();
+                return;
+            }
+            throw $e;
         }
         /** @var Log $log */
         foreach ($logs as $log) {
