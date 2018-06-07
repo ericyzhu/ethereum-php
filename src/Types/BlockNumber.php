@@ -72,4 +72,12 @@ class BlockNumber extends TypeAbstract
     {
         return $this->isTag ? $this->getBinary() : $this->getInt();
     }
+
+    /**
+     * @return string
+     */
+    public function toHexString(): string
+    {
+        return $this->isTag ? $this->getBinary() : Utils::ensureHexPrefix(parent::getHex());
+    }
 }
