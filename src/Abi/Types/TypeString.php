@@ -53,6 +53,6 @@ class TypeString extends AbstractType implements TypeStringInterface
      */
     public function isDynamic(): bool
     {
-        return false;
+        return true;
     }
 }
