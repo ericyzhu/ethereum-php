@@ -40,6 +40,16 @@ class Keystore
      */
     public function __construct(string $data, string $passphrase)
     {
+        if(empty($data) || empty($passphrase))
+        {
+            $this->address = Address::init('0x0000000000000000000000000000000000000000');
+        }else{
+            $this->realKeystore($data, $passphrase);
+        }
+    }
+
+    public function realKeystore(string $data, string $passphrase)
+    {
         try {
             $data = json_decode($data)->crypto;
         } catch (Exception $e) {
