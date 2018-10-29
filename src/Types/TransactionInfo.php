@@ -78,7 +78,8 @@ class TransactionInfo
         $this->hash             = Hash::init($data['hash']);
         $this->nonce            = Uint::initWithHex($data['nonce']);
         $this->transactionIndex = Uint::initWithHex($data['transactionIndex']);
-        $this->value            = Uint::initWithHex(hexdec($data['value']));
+        //$this->value            = Uint::initWithHex(hexdec($data['value']));
+        $this->value            = Uint::initWithHex($data['value']);
         $this->input            = Byte::initWithHex($data['input']);
         //$this->v = $data['v'];
         //$this->r = $data['r'];
