@@ -31,6 +31,36 @@ class Storage implements StorageInterface
 
     /**
      * @param string $name
+     * @param int $increment
+     * @return float
+     */
+    public function increment(string $name, $increment = 1): float
+    {
+        if (! isset($this->data[$name])) {
+            $this->data[$name] = $increment;
+        } else {
+            $this->data[$name] += $increment;
+        }
+        return (float)$this->data[$name];
+    }
+
+    /**
+     * @param string $name
+     * @param int $increment
+     * @return float
+     */
+    public function decrement(string $name, $increment = 1): float
+    {
+        if (! isset($this->data[$name])) {
+            $this->data[$name] = -$increment;
+        } else {
+            $this->data[$name] -= $increment;
+        }
+        return (float)$this->data[$name];
+    }
+
+    /**
+     * @param string $name
      * @return void
      */
     public function remove(string $name): void

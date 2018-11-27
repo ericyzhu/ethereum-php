@@ -6,7 +6,6 @@ use Ethereum\Rlp;
 use Ethereum\Types\Byte;
 use Ethereum\Types\Transaction;
 use Ethereum\Types\Uint;
-use Ethereum\Utils;
 use Exception;
 
 final class TransactionSigner
@@ -38,10 +37,8 @@ final class TransactionSigner
      */
     public function sign(Transaction $transaction, Byte $privateKey): Byte
     {
-        /** @var Byte $hash */
-        $hash = $this->hash($transaction);
-
-        $signature = Signature::sign($hash, $privateKey);
+        $serialized = $this->serialize($transaction);
+        $signature = Signature::sign($serialized, $privateKey);
 
         $r = Uint::initWithBuffer($signature->slice(0, 32)->getBuffer());
         $s = Uint::initWithBuffer($signature->slice(32, 32)->getBuffer());
@@ -60,7 +57,7 @@ final class TransactionSigner
      * @return Byte
      * @throws Exception
      */
-    protected function hash(Transaction $transaction): Byte
+    protected function serialize(Transaction $transaction): Byte
     {
         $raw = [
             $transaction->nonce,
@@ -79,7 +76,6 @@ final class TransactionSigner
             ]);
         }
 
-        $hash = Rlp::encode($raw);
-        return Byte::init(Keccak::hash($hash->getBinary(), 256, true));
+        return Rlp::encode($raw);
     }
 }

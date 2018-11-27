@@ -1,7 +1,8 @@
 <?php
 
-namespace Ethereum;
+namespace Ethereum\Keystore;
 
+use Ethereum\Crypto\Ecdsa;
 use Ethereum\Crypto\Keccak;
 use Ethereum\Crypto\TransactionSigner;
 use Ethereum\Types\Address;
@@ -11,7 +12,15 @@ use Ethereum\Types\Uint;
 use Exception;
 use InvalidArgumentException;
 
-class Keystore
+/**
+ * Class Key
+ * @package Ethereum\Keystore
+ *
+ * @property Byte $privateKey
+ * @property Byte $publicKey
+ * @property Address $address
+ */
+class Key
 {
     /**
      * @var Byte
@@ -34,21 +43,43 @@ class Keystore
     private $transactionSigner;
 
     /**
-     * @param string $data
-     * @param string $passphrase
+     * @param Byte $privateKey
      * @throws Exception
      */
-    public function __construct(string $data, string $passphrase)
+    public function __construct(Byte $privateKey)
+    {
+        $this->privateKey = $privateKey;
+        $this->publicKey = Ecdsa::createPublicKey($this->privateKey);
+        $this->address = Ecdsa::createAddress($this->publicKey);
+    }
+
+    /**
+     * @param Byte $privateKey
+     * @return Key
+     * @throws Exception
+     */
+    public static function initWithPrivateKey(Byte $privateKey): Key
+    {
+        return new static($privateKey);
+    }
+
+    /**
+     * @param string $keystore
+     * @param string $passphrase
+     * @return Key
+     * @throws Exception
+     */
+    public static function initWithKeystore(string $keystore, string $passphrase): Key
     {
         try {
-            $data = json_decode($data)->crypto;
+            $data = json_decode($keystore)->crypto;
         } catch (Exception $e) {
             throw new InvalidArgumentException('Argument is not a valid JSON string.');
         }
 
         switch ($data->kdf) {
             case 'pbkdf2':
-                $derivedKey = $this->derivePbkdf2EncryptedKey(
+                $derivedKey = static::derivePbkdf2EncryptedKey(
                     $passphrase,
                     $data->kdfparams->prf,
                     $data->kdfparams->salt,
@@ -57,7 +88,7 @@ class Keystore
                 );
                 break;
             case 'scrypt':
-                $derivedKey = $this->deriveScryptEncryptedKey(
+                $derivedKey = static::deriveScryptEncryptedKey(
                     $passphrase,
                     $data->kdfparams->salt,
                     $data->kdfparams->n,
@@ -70,13 +101,11 @@ class Keystore
                 throw new Exception(sprintf('Unsupported KDF function "%s".', $data->kdf));
         }
 
-        if (! $this->validateDerivedKey($derivedKey, $data->ciphertext, $data->mac)) {
+        if (! static::validateDerivedKey($derivedKey, $data->ciphertext, $data->mac)) {
             throw new Exception('Passphrase is invalid.');
         }
-
-        $this->privateKey = $this->decryptPrivateKey($data->ciphertext, $derivedKey, $data->cipher, $data->cipherparams->iv);
-        $this->publicKey = $this->createPublicKey($this->privateKey);
-        $this->address = $this->parseAddress($this->publicKey);
+        $privateKey = static::decryptPrivateKey($data->ciphertext, $derivedKey, $data->cipher, $data->cipherparams->iv);
+        return static::initWithPrivateKey($privateKey);
     }
 
     /**
@@ -88,7 +117,7 @@ class Keystore
      * @return string
      * @throws Exception
      */
-    private function derivePbkdf2EncryptedKey(string $passphrase, string $prf, string $salt, int $c, $dklen)
+    private static function derivePbkdf2EncryptedKey(string $passphrase, string $prf, string $salt, int $c, $dklen)
     {
         if ($prf != 'hmac-sha256') {
             throw new Exception(sprintf('Unsupported PRF function "%s".', $prf));
@@ -105,7 +134,7 @@ class Keystore
      * @param int $dklen
      * @return string
      */
-    private function deriveScryptEncryptedKey(string $passphrase, string $salt, int $n, int $r, int $p, int $dklen)
+    private static function deriveScryptEncryptedKey(string $passphrase, string $salt, int $n, int $r, int $p, int $dklen)
     {
         return scrypt($passphrase, pack('H*', $salt), $n, $r, $p, $dklen);
     }
@@ -117,7 +146,7 @@ class Keystore
      * @return bool
      * @throws Exception
      */
-    private function validateDerivedKey(string $key, string $ciphertext, string $mac)
+    private static function validateDerivedKey(string $key, string $ciphertext, string $mac)
     {
         return Keccak::hash(pack('H*', substr($key, 32, 32).$ciphertext)) === $mac;
     }
@@ -130,60 +159,10 @@ class Keystore
      * @return Byte
      * @throws Exception
      */
-    private function decryptPrivateKey(string $ciphertext, string $key, string $cipher, string $iv): Byte
+    private static function decryptPrivateKey(string $ciphertext, string $key, string $cipher, string $iv): Byte
     {
         $output = openssl_decrypt(pack('H*', $ciphertext), $cipher, pack('H*', substr($key, 0, 32)),OPENSSL_RAW_DATA, pack('H*', $iv));
         return Byte::init($output);
-    }
-
-    /**
-     * @param Byte $privateKey
-     * @return Byte
-     * @throws Exception
-     */
-    private function createPublicKey(Byte $privateKey): Byte
-    {
-        $context = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
-        /** @var resource $publicKey */
-        $publicKey = '';
-        $result = secp256k1_ec_pubkey_create($context, $publicKey, $privateKey->getBinary());
-        if ($result === 1) {
-            $serialized = '';
-            if (1 !== secp256k1_ec_pubkey_serialize($context, $serialized, $publicKey, false)) {
-                throw new Exception('secp256k1_ec_pubkey_serialize: failed to serialize public key');
-            }
-            $serialized = substr($serialized, 1, 64);
-            unset($publicKey, $context);
-            return Byte::init($serialized);
-        }
-        throw new Exception('secp256k1_pubkey_create: secret key was invalid');
-    }
-
-    /**
-     * @param Byte $publicKey
-     * @return Address
-     * @throws Exception
-     */
-    private function parseAddress(Byte $publicKey): Address
-    {
-        $hash = Keccak::hash($publicKey->getBinary());
-        return Address::init(substr($hash, -40, 40));
-    }
-
-    /**
-     * @return Byte
-     */
-    public function getPrivateKey(): Byte
-    {
-        return $this->privateKey;
-    }
-
-    /**
-     * @return Address
-     */
-    public function getAddress(): Address
-    {
-        return $this->address;
     }
 
     /**
@@ -197,6 +176,15 @@ class Keystore
         if (empty($this->transactionSigner)) {
             $this->transactionSigner = new TransactionSigner($chainId);
         }
-        return $this->transactionSigner->sign($transaction, $this->getPrivateKey());
+        return $this->transactionSigner->sign($transaction, $this->privateKey);
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function __get(string $name)
+    {
+        return $this->{$name};
     }
 }

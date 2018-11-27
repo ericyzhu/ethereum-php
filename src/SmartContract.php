@@ -9,9 +9,9 @@ use Ethereum\Types\Address;
 use Ethereum\Types\Byte;
 use Ethereum\Types\Event;
 use Ethereum\Types\Log;
+use Ethereum\Types\RawTransactionReceipt;
 use Ethereum\Types\Transaction;
 use Ethereum\Types\BlockNumber;
-use Ethereum\Types\Hash;
 use BadMethodCallException;
 use Ethereum\Types\Uint;
 use Exception;
@@ -103,6 +103,10 @@ class SmartContract
         return $id;
     }
 
+    /**
+     * @param Log $log
+     * @throws Exception
+     */
     public function dispatch(Log $log): void
     {
         $topic = count($log->topics) > 0 ? $log->topics[0] : null;
@@ -133,10 +137,11 @@ class SmartContract
      * @param string $functionName
      * @param array $arguments
      * @param Uint|null $gasPrice
+     * @param Uint|null $nonce
      * @return mixed
      * @throws Exception
      */
-    public function call(string $functionName, array $arguments, ?Uint $gasPrice = null)
+    public function call(string $functionName, array $arguments, ?Uint $gasPrice = null, ?Uint $nonce = null)
     {
         $function = $this->getFunction($functionName);
         $data     = Byte::initWithHex($function->getSignature() . $function->inputs->serialize($arguments));
@@ -144,7 +149,7 @@ class SmartContract
         if ($function->constant) {
             return $this->callConstantFunction($function, $data);
         } else {
-            return $this->callNonConstantFunction($function, $data, $gasPrice);
+            return $this->callNonConstantFunction($function, $data, $gasPrice, $nonce);
         }
     }
 
@@ -156,9 +161,9 @@ class SmartContract
      */
     protected function callConstantFunction(StructFunction $function, Byte $data)
     {
-        $nodeAddress = $this->client->keystore()->getAddress();
+        $key = $this->client->keystore()->getNextKey();
         $transaction = new Transaction(
-            $nodeAddress,
+            $key->address,
             $this->address,
             $data
         );
@@ -170,21 +175,22 @@ class SmartContract
      * @param StructFunction $function
      * @param Byte $data
      * @param Uint|null $gasPrice
-     * @return Hash
+     * @param Uint|null $nonce
+     * @return RawTransactionReceipt
      * @throws Exception
      */
-    protected function callNonConstantFunction(StructFunction $function, Byte $data, ?Uint $gasPrice = null)
+    protected function callNonConstantFunction(StructFunction $function, Byte $data, ?Uint $gasPrice = null, ?Uint $nonce = null)
     {
-        $nodeAddress = $this->client->keystore()->getAddress();
         if ($function->payable) {
             // @todo
             throw new Exception('Can not call payable function.');
         }
+        $key = $this->client->keystore()->getNextKey();
         // query gas price
         $gasPrice = $gasPrice ?? ($this->client->gasPrice ?? $this->client->eth()->gasPrice());
         // create transaction
         $transaction = new Transaction(
-            $nodeAddress,
+            $key->address,
             $this->address,
             $data,
             null,
@@ -193,10 +199,15 @@ class SmartContract
         // query gas
         $transaction->gas   = $this->client->gasLimit ?? $this->client->eth()->estimateGas($transaction);
         // query nonce
-        $transaction->nonce = $this->client->eth()->getTransactionCount($nodeAddress, BlockNumber::init(BlockNumber::PENDING));
+        $transaction->nonce = empty($nonce) ? $this->client->eth()->getTransactionCount($key->address, BlockNumber::init(BlockNumber::PENDING)) : $nonce;
         // sign transaction
-        $rawTransaction = $this->client->keystore()->signTransaction($transaction, $this->client->chainId);
+        $rawTransaction = $key->signTransaction($transaction, $this->client->chainId);
 
-        return $this->client->eth()->sendRawTransaction($rawTransaction);
+        $transactionHash = $this->client->eth()->sendRawTransaction($rawTransaction);
+
+        return new RawTransactionReceipt(
+            $transactionHash,
+            $transaction
+        );
     }
 }

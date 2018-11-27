@@ -19,6 +19,20 @@ interface StorageInterface
 
     /**
      * @param string $name
+     * @param int|float $increment
+     * @return double
+     */
+    public function increment(string $name, $increment = 1): float;
+
+    /**
+     * @param string $name
+     * @param int|float $increment
+     * @return float
+     */
+    public function decrement(string $name, $increment = 1): float;
+
+    /**
+     * @param string $name
      * @return void
      */
     public function remove(string $name): void;

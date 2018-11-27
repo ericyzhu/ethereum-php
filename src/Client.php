@@ -2,6 +2,7 @@
 
 namespace Ethereum;
 
+use Ethereum\Keystore\Keystore;
 use Ethereum\Methods\Eth;
 use Ethereum\Methods\Net;
 use Ethereum\Methods\Web3;
@@ -66,25 +67,31 @@ class Client
     private $gasLimit;
 
     /**
+     * @var int
+     */
+    private $timeout = 15;
+
+    /**
      * @param string $url
      * @param int $chainId
-     * @param string $keystore
-     * @param string $passphrase
      * @param StorageInterface|null $storage
+     * @throws Exception
      */
-    public function __construct(string $url, int $chainId, string $keystore, string $passphrase, ?StorageInterface $storage = null)
+    public function __construct(string $url, int $chainId, ?StorageInterface $storage = null)
     {
-        $this->rpcClient = JsonRpcClient::factory($url);
+        $this->rpcClient = JsonRpcClient::factory($url, [
+            'timeout' => $this->timeout,
+        ]);
         $this->chainId   = Uint::init($chainId);
         $this->methods   = [
             'net'  => new Net($this->rpcClient),
             'eth'  => new Eth($this->rpcClient),
             'web3' => new Web3($this->rpcClient),
         ];
-        $this->keystore     = new Keystore($keystore, $passphrase);
+        $this->storage      = empty($storage) ? new Storage : $storage;
         $this->contracts    = new SmartContractCollection($this);
         $this->synchronizer = new Synchronizer($this, $this->contracts);
-        $this->storage      = empty($storage) ? new Storage : $storage;
+        $this->keystore     = new Keystore($this->storage);
     }
 
     /**
@@ -136,6 +143,16 @@ class Client
     public function setGasLimit(int $value)
     {
         $this->gasLimit = empty($value) ? null : Uint::init($value);
+        return $this;
+    }
+
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function setTimeout(int $value)
+    {
+        $this->timeout = $value;
         return $this;
     }
 
